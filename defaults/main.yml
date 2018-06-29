@@ -1,2 +1,17 @@
 ---
 filebeat_host: localhost:5044
+filebeat_config_prospectors: ""
+module_filebeat_config_prospectors: |
+  filebeat.config.modules:
+    enabled: true
+    path: ${path.config}/modules.d/*.yml
+json_filebeat_config_prospectors: |
+  filebeat.prospectors:
+  - paths:
+      - {{ json_log_location }}
+    input_type: log
+  processors:
+   - decode_json_fields:
+       fields: ['message']
+       target: ""
+       overwrite_keys: true

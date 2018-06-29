@@ -1,41 +1,25 @@
 ---
-- import_role:
-    name: torian.filebeat
-  vars:
-    filebeat_version: 6.x
-    filebeat_create_user: false
-    filebeat_use_repo: true
-    filebeat_use_repo: true
-    filebeat_upgrade: true
-    filebeat_config_file: /etc/filebeat/filebeat.yml
-    filebeat_config_prospectors: |
-      filebeat.config.modules:
-        enabled: true
-        path: ${path.config}/modules.d/*.yml
-    filebeat_config_output: |
-            output:
-              logstash:
-                hosts: [ '{{ filebeat_host }}' ]
-                ssl.enabled: true
-                ssl.certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
 
+- name: "Enable filebeat module prospectors"
+  set_fact:
+   filebeat_config_prospectors: "{{ filebeat_config_prospectors }}\n{{ module_filebeat_config_prospectors }}"
+  when: nginx is defined
+
+- name: "Enable filebeat json prospectors"
+  set_fact:
+   filebeat_config_prospectors: "{{ filebeat_config_prospectors }}\n{{ json_filebeat_config_prospectors }}"
+  when: json_log_location is defined
+
+- include: filebeat.yml
 
 - name: "Enable nginx filebeat module"
   shell: "filebeat modules enable nginx"
+  when: nginx==true
 
-- name: "Create directory for cert"
-  file:
-    path=/etc/pki/tls/certs
-    state=directory
-
-- name: "Copy nginx filebeat conf"
+- name: "Copy custom nginx filebeat conf"
   template: src=nginx.yml.j2
             dest=/etc/filebeat/modules.d/nginx.yml
-
-- name: "Copy ssl cert"
-  copy:
-    src: files/beats/logstash-forwarder.crt
-    dest: /etc/pki/tls/certs/logstash-forwarder.crt
+  when: nginx==true
 
 - name: "Restart filebeat"
   service:
