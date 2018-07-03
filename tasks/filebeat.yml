@@ -1,0 +1,30 @@
+- import_role:
+    name: torian.filebeat
+  vars:
+    filebeat_version: 6.x
+    filebeat_create_user: false
+    filebeat_use_repo: true
+    filebeat_upgrade: true
+    filebeat_config_file: /etc/filebeat/filebeat.yml
+    filebeat_config_output: |
+      output:
+        logstash:
+          hosts: [ '{{ filebeat_host }}' ]
+          ssl.enabled: true
+          ssl.certificate_authorities: ["/etc/pki/tls/certs/logstash-forwarder.crt"]
+  notify:
+    - restart filebeat
+
+- name: "Create directory for cert"
+  file:
+    path=/etc/pki/tls/certs
+    state=directory
+  notify:
+    - restart filebeat
+
+- name: "Copy ssl cert"
+  copy:
+    src: files/beats/logstash-forwarder.crt
+    dest: /etc/pki/tls/certs/logstash-forwarder.crt
+  notify:
+    - restart filebeat
