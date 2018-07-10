@@ -24,7 +24,7 @@
 
 - name: "Copy ssl cert"
   copy:
-    dest: /etc/pki/tls/certs/logstash-forwarder2.crt
+    dest: /etc/pki/tls/certs/logstash-forwarder.crt
     content: "{{ beats_ssl_cert }}"
   notify:
     - restart filebeat
