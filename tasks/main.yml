@@ -1,0 +1,25 @@
+---
+
+- name: "Enable filebeat module prospectors"
+  set_fact:
+   filebeat_config_prospectors: "{{ filebeat_config_prospectors }}\n{{ module_filebeat_config_prospectors }}"
+  when: nginx is defined
+
+- name: "Enable filebeat json prospectors"
+  set_fact:
+   filebeat_config_prospectors: "{{ filebeat_config_prospectors }}\n{{ json_filebeat_config_prospectors }}"
+  when: json_log_location is defined
+
+- include: filebeat.yml
+
+- name: "Enable nginx filebeat module"
+  shell: "filebeat modules enable nginx"
+  when: nginx is defined
+
+- name: "Copy custom nginx filebeat conf"
+  template:
+    src: nginx.yml.j2
+    dest: /etc/filebeat/modules.d/nginx.yml
+  when: nginx is defined
+  notify:
+    - restart filebeat
