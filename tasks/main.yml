@@ -10,6 +10,17 @@
    filebeat_config_prospectors: "{{ filebeat_config_prospectors }}\n{{ json_filebeat_config_prospectors }}"
   when: json_log_location is defined
 
+- name: "Ignore raintank errors"
+  set_fact:
+   filebeat_config_prospectors: |
+     {{ filebeat_config_prospectors }}
+     processors:
+      - drop_event:
+          when:
+             regexp:
+                message: "159.65.193.69"
+  when: ignore_raintank is defined
+
 - include: filebeat.yml
 
 - name: "Enable nginx filebeat module"
