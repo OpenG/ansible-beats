@@ -18,8 +18,8 @@
       - drop_event:
           when:
              regexp:
-                message: "159.65.193.69"
-  when: ignore_raintank is defined
+                message: "{{ ignore_ip }}"
+  when: ignore_ip is defined
 
 - include: filebeat.yml
 
